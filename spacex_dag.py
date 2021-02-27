@@ -16,10 +16,11 @@ default_args = {
 
 dag = DAG("spacex", default_args=default_args, schedule_interval="0 0 1 1 *")
 for rocket_type in ("all","falcon1","falcon9","falconheavy"):
+    rocket_type_fixed = (rocket_type, '')[rocket_type='all']
     t1 = BashOperator(
         task_id="get_data_" + rocket_type, 
         bash_command="python3 /root/airflow/dags/spacex/load_launches.py -r {{ params.rocket }} -y {{ execution_date.year }} -o /var/data",
-        params={"rocket": (rocket_type, '')[rocket_type='all']}, 
+        params={"rocket": rocket_type_fixed}, 
         dag=dag
     )
 
