@@ -30,4 +30,3 @@ git_pull = BashOperator(
     dag=dag,
 )
 
-git_pull
