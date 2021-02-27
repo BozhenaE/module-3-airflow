@@ -2,7 +2,6 @@ from datetime import timedelta, datetime
 
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
-from airflow.operators.latest_only_operator import LatestOnlyOperator
 from airflow.utils.dates import days_ago
 
 default_args = {
@@ -23,7 +22,7 @@ dag = DAG(
     schedule_interval=timedelta(seconds=60),
 )
 
-latest_only = LatestOnlyOperator(task_id='latest_only', dag=dag)
+
 
 git_pull = BashOperator(
     task_id='git_pull',
@@ -31,4 +30,4 @@ git_pull = BashOperator(
     dag=dag,
 )
 
-latest_only >> git_pull
+git_pull
