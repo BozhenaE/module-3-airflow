@@ -4,19 +4,15 @@ from random import randint
 from airflow import DAG
 from airflow.contrib.operators.dataproc_operator import DataProcHiveOperator
 
+USERNAME = 'emateshuk'
+
 default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime(2012, 1, 1, 0, 0, 0),
-    'email': ['airflow@example.com'],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(seconds=20),
+    'owner': USERNAME,
+    'start_date': datetime(2012, 1, 1, 0, 0, 0)
 }
 
 dag = DAG(
-    'data_lake_etl',
+    USERNAME + '_data_lake_etl',
     default_args=default_args,
     description='Data Lake ETL tasks',
     schedule_interval="0 0 1 1 *",
@@ -26,9 +22,11 @@ ods_billing = DataProcHiveOperator(
     task_id='ods_billing',
     dag=dag,
     query="""
-        insert overwrite table ods.billing partition (year='{{ execution_date.year }}') 
-        select * from stg.billing where year(from_unixtime(`timestamp` div 1000)) = {{ execution_date.year }};
+        insert overwrite table emateshuk.ods_billing partition (year='{{ execution_date.year }}') 
+        select * from emateshuk.stg_billing where year(created_at) = {{ execution_date.year }};
     """,
     cluster_name='cluster-dataproc',
-    region='us-central1',
+    job_name=USERNAME + '_ods_billing_{{ execution_date.year }}_{{ params.job_suffix }}',
+    params={"job_suffix": randint(0, 100000)},
+    region='europe-west3',
 )
