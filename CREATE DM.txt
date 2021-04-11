@@ -1,0 +1,7 @@
+CREATE EXTERNAL TABLE dm_traffic(user_id INT, max_bytes_received BIGINT, min_bytes_received BIGINT, avg_bytes_received BIGINT) PARTITIONED BY (year STRING) 
+STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/dm/traffic';
+
+insert overwrite table bektova.dm_traffic partition (year='2020')  
+               select user_id, max(bytes_received), min(bytes_received), round(avg(bytes_received)) as avg_bytes_received
+                 from bektova.ods_traffic where year = 2020 group by user_id order by avg_bytes_received; 
+select * from dm_traffic;

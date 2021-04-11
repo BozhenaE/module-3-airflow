@@ -1,0 +1,27 @@
+ 
+USE bektova
+
+CREATE EXTERNAL TABLE ods_billing(user_id INT, billing_period STRING, service STRING, tariff STRING, sum DECIMAL(10,0), created_at TIMESTAMP) PARTITIONED BY (year STRING) STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/ods/billing';
+
+INSERT OVERWRITE TABLE bektova.ods_billing partition (year='2020') 
+               select user_id, billing_period, service, tariff, cast(sum as DECIMAL(10,2)), CAST(created_at as TIMESTAMP) 
+                      FROM bektova.stg_billing WHERE YEAR(created_at) = 2020;
+
+---
+CREATE EXTERNAL TABLE ods_issue(user_id INT, start_time TIMESTAMP, end_time TIMESTAMP, title STRING, description STRING, service STRING) PARTITIONED BY (year STRING) STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/ods/issue';
+
+insert overwrite table bektova.ods_issue partition (year='2020') select cast(user_id as INT), cast(start_time as TIMESTAMP), cast(end_time as TIMESTAMP), title, description, service 
+from bektova.stg_issue where year(start_time) = 2020;   
+---
+CREATE EXTERNAL TABLE ods_traffic(user_id INT, `timestamp` TIMESTAMP, device_id STRING, device_ip_addr STRING, bytes_sent BIGINT, bytes_received BIGINT) PARTITIONED BY (year STRING) 
+STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/ods/traffic';
+
+insert overwrite table bektova.ods_traffic partition (year='2020') select user_id, from_unixtime(cast(`timestamp`/1000 as int)), device_id, device_ip_addr, bytes_sent, bytes_received from bektova.stg_traffic where year(from_unixtime(cast(`timestamp`/1000 as int))) = 2020;
+   
+---
+CREATE EXTERNAL TABLE ods_payment(user_id INT, pay_doc_type STRING, pay_doc_num BIGINT, account STRING, phone STRING, billing_period STRING, pay_date DATE, sum DECIMAL(10,2)) PARTITIONED BY (year STRING) 
+STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/data_lake/ods/payment';
+
+insert overwrite table bektova.ods_payment partition (year='2020') 
+select user_id, pay_doc_type, pay_doc_num, account, phone, billing_period, cast(pay_date as DATE), cast(sum as DECIMAL(10,2))
+from bektova.stg_payment where year(pay_date) = 2020;  

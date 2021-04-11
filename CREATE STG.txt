@@ -1,0 +1,17 @@
+gsutil ls gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/stg/billing
+
+ssh bektova@hadoop.rt.dadadata.ru   
+
+set hive.execution.engine=mr;
+USE bektova
+CREATE EXTERNAL TABLE stg_billing(user_id INT, billing_period STRING, service STRING, tariff STRING, sum STRING, created_at STRING)
+STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/stg/billing';
+
+CREATE EXTERNAL TABLE stg_issue(user_id string, start_time STRING, end_time STRING, title STRING, description STRING, service STRING)
+    STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/stg/issue';
+
+CREATE EXTERNAL TABLE stg_traffic(user_id INT, `timestamp` STRING, device_id STRING, device_ip_addr STRING, bytes_sent BIGINT, bytes_received BIGINT)
+    STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/stg/traffic';
+
+CREATE EXTERNAL TABLE stg_payment(user_id INT, pay_doc_type STRING, pay_doc_num BIGINT, account STRING, phone STRING, billing_period STRING, pay_date STRING, sum STRING)
+    STORED AS PARQUET LOCATION 'gs://rt-2021-03-25-16-47-29-sfunu-bektova/data_lake/stg/payment';
