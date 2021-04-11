@@ -60,14 +60,14 @@ for task in tasks:
 dm = DataProcHiveOperator(
     task_id='dm_traffic',
     dag=dag,
-    query="""
-    insert overwrite table bektova.dm_traffic partition (year='{{ execution_date.year }}')  
-               select user_id, max(bytes_received), min(bytes_received), round(avg(bytes_received)) as avg_bytes_received
-                 from bektova.ods_traffic where year = {{ execution_date.year }} group by user_id order by avg_bytes_received;    
-          """,
+    query= """
+        insert overwrite table bektova.dm_traffic partition (year='{{ execution_date.year }}')  
+        select user_id, max(bytes_received), min(bytes_received), round(avg(bytes_received)) as avg_bytes_received
+        from bektova.ods_traffic where year = {{ execution_date.year }} group by user_id order by avg_bytes_received;    
+        """,
     cluster_name='cluster-dataproc',
     job_name=username + '_{{ execution_date.year }}_dm_traffic_{{ params.job_suffix }}',
     params={"job_suffix": randint(0, 100000)},
     region='europe-west3',
-)
+    )
 ods >> dm
